@@ -216,7 +216,6 @@ class _GameScreenState extends State<GameScreen>
 
   // ------------------------------------------------------------------- HUD
   Widget _hud() {
-    final t = _t;
     final e = _engine;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
