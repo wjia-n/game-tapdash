@@ -39,7 +39,7 @@ class TapDashSettings extends ChangeNotifier {
   String mode = 'quick'; // quick | attack | bot
   int playerCount = 1; // 1..4 (pass-and-play); bot mode forces 1
   int botDifficulty = 1; // 0 easy, 1 medium, 2 hard
-  bool isPro = false;
+  bool isPro = true; // everything unlocked — no Pro version
 
   // Lifetime stats.
   int bestQuickAvg = 0; // lowest average ms (0 = none yet)

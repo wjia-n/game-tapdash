@@ -32,33 +32,16 @@ class _ProScreenState extends State<ProScreen> {
   @override
   void initState() {
     super.initState();
-    widget.store.proPurchased.addListener(_onPro);
     widget.store.lastThanks.addListener(_onThanks);
   }
 
   @override
   void dispose() {
-    widget.store.proPurchased.removeListener(_onPro);
     widget.store.lastThanks.removeListener(_onThanks);
     super.dispose();
   }
 
-  void _onPro() {
-    if (widget.store.proPurchased.value && mounted) {
-      widget.settings.setPro(true);
-      widget.audio.win();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('PRO unlocked — enjoy everything!',
-              style: DashKit.label(15, _t).copyWith(color: Colors.white)),
-          backgroundColor: _t.accentDark,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      widget.store.proPurchased.value = false;
-    }
-  }
-
+  
   void _onThanks() {
     final msg = widget.store.lastThanks.value;
     if (msg == null || !mounted) return;
