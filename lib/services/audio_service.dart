@@ -18,6 +18,9 @@ import 'package:audioplayers/audioplayers.dart';
 ///   resumes exactly where it left off instead of restarting or dying.
 /// - Every public method catches player errors; audio can never crash the app.
 class TapDashAudio {
+  /// Per-game pitch character (tapdash): 1.25x. Makes SFX unique.
+  static const double _pitchMul = 1.250;
+
   static const int _rate = 22050;
   final AudioPlayer _sfx = AudioPlayer();
   final AudioPlayer _music = AudioPlayer();
@@ -104,6 +107,8 @@ class TapDashAudio {
 
   List<double> _tone(double freq, double secs,
       {double freqEnd = 0, double attack = 0.02, double harmonics = 0.25}) {
+    freq *= _pitchMul;
+    freqEnd *= _pitchMul;
     final n = (_rate * secs).round();
     final out = List<double>.filled(n, 0);
     for (int i = 0; i < n; i++) {
@@ -165,66 +170,56 @@ class TapDashAudio {
 
   /// Bouncy bassline + claps: menu groove, 12s loop.
   Uint8List _menuBytes() => _clip('music_menu', () {
-        final n = (_rate * 12).round();
-        final out = List<double>.filled(n, 0);
-        final bass = [130.81, 130.81, 146.83, 130.81, 98.0, 98.0, 110.0, 123.47];
-        final beat = n ~/ 8;
-        for (int k = 0; k < 8; k++) {
-          final start = k * beat;
-          final tone = _tone(bass[k], 0.42, harmonics: 0.3);
-          for (int i = 0; i < tone.length && start + i < n; i++) {
-            out[start + i] += tone[i] * 0.5;
-          }
-          // clap on beats 2 and 4 of each bar pair
-          if (k % 4 == 1 || k % 4 == 3) {
-            final clapLen = (_rate * 0.09).round();
-            for (int i = 0; i < clapLen && start + i < n; i++) {
-              final t = i / _rate;
-              out[start + i] +=
-                  (_rand.nextDouble() * 2 - 1) * exp(-t * 90) * 0.4;
-            }
-          }
-        }
-        // sparkle arpeggio on top
-        final plucks = [523.25, 587.33, 659.25, 783.99, 659.25, 587.33];
-        for (int k = 0; k < plucks.length; k++) {
-          final start = (n * k / plucks.length).round();
-          final tone = _tone(plucks[k], 0.3, harmonics: 0.35);
-          for (int i = 0; i < tone.length && start + i < n; i++) {
-            out[start + i] += tone[i] * 0.22;
-          }
+        // D 0 – 5 – 3 – 4 warm pad, 16s loop. Unique to tapdash.
+        final seq = [
+          [146.83, 184.99, 220.00],
+          [246.94, 293.66, 369.99],
+          [195.99, 246.94, 293.66],
+          [220.00, 277.18, 329.62]
+        ];
+        final out = <double>[];
+        for (final chord in seq) {
+          out.addAll(_padChord(chord, 4.0));
         }
         return out;
       });
 
+
   /// Driving game groove: punchy bass + faster sparkle, 10s loop.
   Uint8List _gameBytes() => _clip('music_game', () {
-        final n = (_rate * 10).round();
-        final out = List<double>.filled(n, 0);
-        final bass = [
-          146.83, 146.83, 164.81, 146.83, //
-          130.81, 130.81, 146.83, 164.81, //
-          146.83, 146.83, 164.81, 196.0, //
-          174.61, 164.81, 146.83, 130.81, //
-        ];
-        final beat = n ~/ 16;
-        for (int k = 0; k < 16; k++) {
-          final start = k * beat;
-          final tone = _tone(bass[k], 0.28, harmonics: 0.35);
-          for (int i = 0; i < tone.length && start + i < n; i++) {
-            out[start + i] += tone[i] * 0.45;
-          }
+        // D arpeggiated 0 – 5 – 3 – 4, 16s loop. Unique to tapdash.
+        final notes = [146.83, 184.99, 220.00, 184.99, 246.94, 293.66, 369.99, 293.66, 195.99, 246.94, 293.66, 246.94, 220.00, 277.18, 329.62, 277.18];
+        final out = <double>[];
+        final noteLen = 16.0 / notes.length;
+        for (final n in notes) {
+          out.addAll(_tone(n, noteLen * 0.9, harmonics: 0.3));
+          final gap = List<double>.filled((_rate * noteLen * 0.1).round(), 0);
+          out.addAll(gap);
         }
-        final plucks = [659.25, 783.99, 880.0, 783.99, 659.25, 587.33, 523.25, 587.33];
-        for (int k = 0; k < plucks.length; k++) {
-          final start = (n * k / plucks.length).round();
-          final tone = _tone(plucks[k], 0.25, harmonics: 0.3);
-          for (int i = 0; i < tone.length && start + i < n; i++) {
-            out[start + i] += tone[i] * 0.2;
-          }
+        // Soft pad underneath
+        final pad = _padChord([146.83, 184.99, 220.00], 16.0);
+        for (int i = 0; i < out.length && i < pad.length; i++) {
+          out[i] += pad[i] * 0.3;
         }
         return out;
       });
+
+
+  /// Soft synth pad from a chord (shared helper).
+  List<double> _padChord(List<double> freqs, double secs) {
+    final n = (_rate * secs).round();
+    final out = List<double>.filled(n, 0);
+    for (int i = 0; i < n; i++) {
+      final t = i / _rate;
+      final env = (1 - exp(-t * 3)) * exp(-t * 0.4);
+      double s = 0;
+      for (final f in freqs) {
+        s += sin(2 * pi * f * t) + 0.35 * sin(2 * pi * f * 2 * t);
+      }
+      out[i] = s / freqs.length * env * 0.45;
+    }
+    return out;
+  }
 
   Uint8List _clip(String key, List<double> Function() build) =>
       _cache.putIfAbsent(key, () => _wav(build()));

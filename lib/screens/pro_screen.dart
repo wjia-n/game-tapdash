@@ -138,18 +138,6 @@ class _ProScreenState extends State<ProScreen> {
                 if (!store.storeReady)
                   _storeNote(t,
                       store.error ?? 'Store not ready yet.'),
-                if (store.proProduct != null)
-                  _buyCard(
-                    t,
-                    title: 'Tap Dash PRO',
-                    subtitle:
-                        'Unlocks Lightning tier, 8 extra arenas, 4 extra dashers, the custom arena creator. One-time purchase.',
-                    price: store.proProduct!.price,
-                    onBuy: () {
-                      widget.audio.click();
-                      store.buyPro();
-                    },
-                  ),
                 const SizedBox(height: 14),
                 DashKit.sectionTitle('Tip jar', t),
                 Text(
