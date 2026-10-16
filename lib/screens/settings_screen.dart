@@ -5,6 +5,7 @@ import '../services/audio_service.dart';
 import '../services/settings_service.dart';
 import '../theme/dash_themes.dart';
 import 'dash_ui.dart';
+import '../transfer/transfer_ui.dart';
 
 const _storeUrl =
     'https://play.google.com/store/apps/details?id=com.gameswajiha.tapdash';
@@ -79,6 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              TransferSaveTile(gameSlug: 'tapdash'),
               DashKit.sectionTitle('Player names', t),
               DashKit.card(
                 t: t,
