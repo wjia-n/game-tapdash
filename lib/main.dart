@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/splash_screen.dart';
 import 'services/audio_service.dart';
+import 'services/iap_service.dart';
 import 'services/settings_service.dart';
 import 'theme/dash_themes.dart';
 
@@ -19,13 +20,19 @@ void main() async {
     sfxOn: settings.sfxOn,
     volume: settings.volume,
   );
-  runApp(TapDashApp(settings: settings, audio: audio));
+  final store = StoreService();
+  runApp(TapDashApp(settings: settings, audio: audio, store: store));
 }
 
 class TapDashApp extends StatefulWidget {
   final TapDashSettings settings;
   final TapDashAudio audio;
-  const TapDashApp({super.key, required this.settings, required this.audio});
+  final StoreService store;
+  const TapDashApp(
+      {super.key,
+      required this.settings,
+      required this.audio,
+      required this.store});
 
   @override
   State<TapDashApp> createState() => _TapDashAppState();
