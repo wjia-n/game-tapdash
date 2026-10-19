@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/audio_service.dart';
+import '../services/iap_service.dart';
 import '../services/settings_service.dart';
 import '../theme/dash_themes.dart';
 import 'dash_ui.dart';
@@ -10,7 +11,12 @@ import 'menu_screen.dart';
 class SplashScreen extends StatefulWidget {
   final TapDashAudio audio;
   final TapDashSettings settings;
-  const SplashScreen({super.key, required this.audio, required this.settings});
+  final StoreService store;
+  const SplashScreen(
+      {super.key,
+      required this.audio,
+      required this.settings,
+      required this.store});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -47,6 +53,7 @@ class _SplashScreenState extends State<SplashScreen>
         builder: (_) => MenuScreen(
           audio: widget.audio,
           settings: widget.settings,
+          store: widget.store,
         ),
       ),
     );

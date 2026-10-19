@@ -73,7 +73,7 @@ class _TapDashAppState extends State<TapDashApp> with WidgetsBindingObserver {
             scaffoldBackgroundColor: theme.idleBg,
             colorScheme: ColorScheme.fromSeed(seedColor: theme.accent),
           ),
-          home: SplashScreen(audio: widget.audio, settings: widget.settings),
+          home: SplashScreen(audio: widget.audio, settings: widget.settings, store: widget.store),
         );
       },
     );

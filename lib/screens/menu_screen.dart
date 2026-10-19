@@ -14,7 +14,12 @@ import 'themes_screen.dart';
 class MenuScreen extends StatelessWidget {
   final TapDashAudio audio;
   final TapDashSettings settings;
-  const MenuScreen({super.key, required this.audio, required this.settings});
+  final StoreService store;
+  const MenuScreen(
+      {super.key,
+      required this.audio,
+      required this.settings,
+      required this.store});
 
   DashThemeDef get _t => DashThemes.byId(
         settings.themeId,
@@ -29,7 +34,7 @@ class MenuScreen extends StatelessWidget {
         builder: (_) => GameScreen(
           audio: audio,
           settings: settings,
-          store: StoreService()..init(),
+          store: store,
         ),
       ),
     ).then((_) => audio.startMenuMusic());
