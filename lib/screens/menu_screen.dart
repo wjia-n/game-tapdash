@@ -27,8 +27,14 @@ class MenuScreen extends StatelessWidget {
       );
 
   void _play(BuildContext context) {
-    audio.click();
-    audio.startGameMusic();
+    // Audio is fire-and-forget and fully guarded: even if every audio call
+    // throws or hangs, navigation MUST still happen.
+    try {
+      audio.click();
+    } catch (_) {}
+    try {
+      audio.startGameMusic();
+    } catch (_) {}
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => GameScreen(
@@ -37,7 +43,11 @@ class MenuScreen extends StatelessWidget {
           store: store,
         ),
       ),
-    ).then((_) => audio.startMenuMusic());
+    ).then((_) {
+      try {
+        audio.startMenuMusic();
+      } catch (_) {}
+    });
   }
 
   @override

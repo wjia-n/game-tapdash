@@ -256,28 +256,36 @@ class TapDashAudio {
   /// Start (or keep) a music track. Generation-serialized: the latest request
   /// always wins; a start issued while an older one is in flight is never
   /// dropped. Re-requesting the current track just ensures it is audible.
+  ///
+  /// Every player call has a timeout and the busy-wait is bounded: a hung
+  /// platform channel can never deadlock music (or the UI) forever.
   Future<void> _startTrack(String track, Uint8List Function() bytes) async {
     if (_disposed) return;
     final gen = ++_musicGen;
     if (_currentTrack == track && !_pausedByLifecycle) {
       // Already on this track — make sure it is actually audible.
       try {
-        await _music.resume();
+        await _music.resume().timeout(const Duration(seconds: 2));
       } catch (_) {}
       return;
     }
-    // Wait for any in-flight op, then bail if superseded meanwhile.
-    while (_musicBusy) {
+    // Wait for any in-flight op (bounded: 100 x 30ms = 3s max), then bail
+    // if superseded meanwhile. Force-reset the flag if it never cleared so
+    // one hung call can't wedge music forever.
+    int spins = 0;
+    while (_musicBusy && spins < 100) {
       await Future.delayed(const Duration(milliseconds: 30));
+      spins++;
     }
+    if (_musicBusy) _musicBusy = false; // hung op: force-reset, move on
     if (gen != _musicGen || _disposed || !musicOn) return;
     _musicBusy = true;
     try {
-      await _music.stop();
+      await _music.stop().timeout(const Duration(seconds: 2));
       if (gen != _musicGen || _disposed || !musicOn) return;
       _currentTrack = track;
       _pausedByLifecycle = false;
-      await _music.play(BytesSource(bytes()));
+      await _music.play(BytesSource(bytes())).timeout(const Duration(seconds: 3));
     } catch (_) {
       if (gen == _musicGen) _currentTrack = null;
     } finally {
@@ -292,12 +300,15 @@ class TapDashAudio {
   /// the user turns music OFF — never on screen navigation.
   Future<void> stopMusic() async {
     ++_musicGen; // cancel any in-flight start
-    while (_musicBusy) {
+    int spins = 0;
+    while (_musicBusy && spins < 100) {
       await Future.delayed(const Duration(milliseconds: 30));
+      spins++;
     }
+    if (_musicBusy) _musicBusy = false; // hung op: force-reset, move on
     if (_disposed) return;
     try {
-      await _music.stop();
+      await _music.stop().timeout(const Duration(seconds: 2));
     } catch (_) {}
     _currentTrack = null;
     _pausedByLifecycle = false;
@@ -308,7 +319,7 @@ class TapDashAudio {
   Future<void> onAppPaused() async {
     if (_disposed || _currentTrack == null) return;
     try {
-      await _music.pause();
+      await _music.pause().timeout(const Duration(seconds: 2));
       _pausedByLifecycle = true;
     } catch (_) {}
   }
@@ -318,7 +329,7 @@ class TapDashAudio {
     if (_disposed || !musicOn || !_pausedByLifecycle) return;
     _pausedByLifecycle = false;
     try {
-      await _music.resume();
+      await _music.resume().timeout(const Duration(seconds: 2));
     } catch (_) {
       // Resume failed (e.g. player was released) — restart the track.
       final track = _currentTrack;

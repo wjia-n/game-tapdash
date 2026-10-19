@@ -138,10 +138,13 @@ class _SquashOnPressState extends State<_SquashOnPress> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _down = true),
-      onTapUp: (_) => setState(() => _down = false),
-      onTapCancel: () => setState(() => _down = false),
+    // Use Listener (raw pointer events) instead of a nested GestureDetector:
+    // a nested tap recognizer competes in the gesture arena and can swallow
+    // the parent button's onTap, making the button appear dead.
+    return Listener(
+      onPointerDown: (_) => setState(() => _down = true),
+      onPointerUp: (_) => setState(() => _down = false),
+      onPointerCancel: (_) => setState(() => _down = false),
       child: AnimatedScale(
         scale: _down ? 0.93 : 1.0,
         duration: const Duration(milliseconds: 90),
