@@ -2,8 +2,7 @@ name: tapdash
 description: Tap Dash by Wajiha - the one-tap reaction-time arcade game.
 publish_to: 'none'
 
-version: 2.0.1+2
-
+version: 2.0.1+3
 environment:
   sdk: ^3.13.5
 
