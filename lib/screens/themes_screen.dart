@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../services/audio_service.dart';
 import '../services/settings_service.dart';
@@ -73,7 +74,7 @@ class ThemesScreen extends StatelessWidget {
                 _proTeaser(context, t,
                     '${DashThemes.all.length - DashThemes.freeThemeIds.length} more arenas in PRO'),
               const SizedBox(height: 14),
-              DashKit.sectionTitle('My custom arena (PRO)', t),
+              DashKit.sectionTitle(defaultTargetPlatform == TargetPlatform.iOS ? 'My custom arena' : 'My custom arena (PRO)', t),
               _customTile(context, t),
               const SizedBox(height: 14),
               DashKit.sectionTitle(
