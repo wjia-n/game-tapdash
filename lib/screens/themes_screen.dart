@@ -71,8 +71,12 @@ class ThemesScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               if (!settings.isPro)
-                _proTeaser(context, t,
-                    '${DashThemes.all.length - DashThemes.freeThemeIds.length} more arenas in PRO'),
+                _proTeaser(
+                    context,
+                    t,
+                    defaultTargetPlatform == TargetPlatform.iOS
+                        ? '${DashThemes.all.length - DashThemes.freeThemeIds.length} more arenas with ⭐ Gold Star'
+                        : '${DashThemes.all.length - DashThemes.freeThemeIds.length} more arenas in PRO'),
               const SizedBox(height: 14),
               DashKit.sectionTitle(defaultTargetPlatform == TargetPlatform.iOS ? 'My custom arena' : 'My custom arena (PRO)', t),
               _customTile(context, t),
@@ -135,7 +139,12 @@ class ThemesScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               if (!settings.isPro)
-                _proTeaser(context, t, '4 more dashers in PRO'),
+                _proTeaser(
+                    context,
+                    t,
+                    defaultTargetPlatform == TargetPlatform.iOS
+                        ? '4 more dashers with ⭐ Gold Star'
+                        : '4 more dashers in PRO'),
               const SizedBox(height: 20),
             ],
           ),
@@ -250,7 +259,9 @@ class ThemesScreen extends StatelessWidget {
                   Text(
                       settings.isPro
                           ? 'Paint your own arena colors.'
-                          : 'PRO feature — design your own arena.',
+                          : (defaultTargetPlatform == TargetPlatform.iOS
+                              ? '⭐ Gold Star feature — design your own arena.'
+                              : 'PRO feature — design your own arena.'),
                       style: DashKit.label(13, t)),
                 ],
               ),
