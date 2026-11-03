@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../services/audio_service.dart';
 import '../services/iap_service.dart';
@@ -95,7 +96,7 @@ class MenuScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (settings.isPro)
+                    if (settings.isPro && defaultTargetPlatform != TargetPlatform.iOS)
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 6),
@@ -204,7 +205,7 @@ class MenuScreen extends StatelessWidget {
                           builder: (_) => SettingsScreen(
                               audio: audio, settings: settings)));
                     }),
-                    _navBtn(context, t, settings.isPro ? 'Pro ✓' : 'Go Pro',
+                    _navBtn(context, t, defaultTargetPlatform == TargetPlatform.iOS ? '⭐ Gold Star' : (settings.isPro ? 'Pro ✓' : 'Go Pro'),
                         Icons.star, () {
                       audio.click();
                       Navigator.of(context).push(MaterialPageRoute(
